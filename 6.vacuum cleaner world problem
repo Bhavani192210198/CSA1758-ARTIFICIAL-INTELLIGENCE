@@ -1,0 +1,54 @@
+class VacuumCleanerWorld:
+    def __init__(self, left_room_dirty, right_room_dirty, vacuum_position):
+        self.left_room_dirty = left_room_dirty
+        self.right_room_dirty = right_room_dirty
+        self.vacuum_position = vacuum_position  # 'left' or 'right'
+        self.actions = []
+
+    def is_goal_state(self):
+        return not self.left_room_dirty and not self.right_room_dirty
+
+    def clean(self):
+        if self.vacuum_position == 'left':
+            if self.left_room_dirty:
+                self.left_room_dirty = False
+                self.actions.append('Clean Left Room')
+        elif self.vacuum_position == 'right':
+            if self.right_room_dirty:
+                self.right_room_dirty = False
+                self.actions.append('Clean Right Room')
+
+    def move_left(self):
+        if self.vacuum_position == 'right':
+            self.vacuum_position = 'left'
+            self.actions.append('Move Left')
+
+    def move_right(self):
+        if self.vacuum_position == 'left':
+            self.vacuum_position = 'right'
+            self.actions.append('Move Right')
+
+    def solve(self):
+        while not self.is_goal_state():
+            self.clean()
+            if self.vacuum_position == 'left' and self.right_room_dirty:
+                self.move_right()
+            elif self.vacuum_position == 'right' and self.left_room_dirty:
+                self.move_left()
+            self.clean()
+
+    def get_actions(self):
+        return self.actions
+
+# Test case 1: Dirt in both rooms, vacuum cleaner starts in the left room
+test_case_1 = VacuumCleanerWorld(left_room_dirty=True, right_room_dirty=True, vacuum_position='left')
+test_case_1.solve()
+print("Test Case 1 Actions:")
+print(test_case_1.get_actions())
+print()
+
+# Test case 2: Dirt in both rooms, vacuum cleaner starts in the right room
+test_case_2 = VacuumCleanerWorld(left_room_dirty=True, right_room_dirty=True, vacuum_position='right')
+test_case_2.solve()
+print("Test Case 2 Actions:")
+print(test_case_2.get_actions())
