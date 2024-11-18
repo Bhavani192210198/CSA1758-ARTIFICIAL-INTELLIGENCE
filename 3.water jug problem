@@ -1,0 +1,63 @@
+from collections import deque
+
+def water_jug_problem():
+    # Initial state
+    initial_state = (0, 0)
+    # Target state: 2 gallons in the 4-gallon jug
+    target = 2
+    # Capacity of the jugs
+    capacities = (4, 3)
+    
+    # Queue for BFS
+    queue = deque([initial_state])
+    # Visited states
+    visited = set()
+    visited.add(initial_state)
+    
+    # Parent map to reconstruct the solution path
+    parent_map = {initial_state: None}
+    
+    while queue:
+        x, y = queue.popleft()
+        
+        # Check if the goal is reached
+        if x == target:
+            return reconstruct_path(parent_map, (x, y))
+        
+        # Generate all possible next states
+        next_states = [
+            (capacities[0], y),  # Fill 4-gallon jug
+            (x, capacities[1]),  # Fill 3-gallon jug
+            (0, y),              # Empty 4-gallon jug
+            (x, 0),              # Empty 3-gallon jug
+            # Pour water from 4-gallon to 3-gallon
+            (max(0, x - (capacities[1] - y)), min(capacities[1], x + y)),
+            # Pour water from 3-gallon to 4-gallon
+            (min(capacities[0], x + y), max(0, y - (capacities[0] - x))),
+        ]
+        
+        for state in next_states:
+            if state not in visited:
+                visited.add(state)
+                queue.append(state)
+                parent_map[state] = (x, y)
+    
+    # If no solution is found
+    return None
+
+def reconstruct_path(parent_map, state):
+    """Reconstruct the path from the initial state to the goal state."""
+    path = []
+    while state:
+        path.append(state)
+        state = parent_map[state]
+    return path[::-1]  # Reverse the path to show it from start to goal
+
+# Solve the problem
+solution = water_jug_problem()
+if solution:
+    print("Solution steps:")
+    for step in solution:
+        print(f"4-gallon: {step[0]}, 3-gallon: {step[1]}")
+else:
+    print("No solution found.")
