@@ -1,0 +1,70 @@
+from collections import deque
+
+def is_valid_state(m_left, c_left, m_right, c_right):
+    """Check if the state is valid."""
+    # Missionaries should never be outnumbered by cannibals on either bank
+    if (m_left > 0 and m_left < c_left) or (m_right > 0 and m_right < c_right):
+        return False
+    # State is valid
+    return True
+
+def get_successors(state):
+    """Generate all possible valid successor states."""
+    m_left, c_left, boat = state
+    successors = []
+    moves = [(1, 0), (0, 1), (1, 1), (2, 0), (0, 2)]  # Possible boat moves
+    
+    for m, c in moves:
+        if boat == 1:  # Boat on the left bank
+            new_state = (m_left - m, c_left - c, 0)
+            m_right, c_right = 3 - new_state[0], 3 - new_state[1]
+        else:  # Boat on the right bank
+            new_state = (m_left + m, c_left + c, 1)
+            m_right, c_right = 3 - new_state[0], 3 - new_state[1]
+        
+        # Ensure state is within bounds and valid
+        if (0 <= new_state[0] <= 3 and 0 <= new_state[1] <= 3 
+                and is_valid_state(new_state[0], new_state[1], m_right, c_right)):
+            successors.append(new_state)
+    return successors
+
+def missionaries_and_cannibals():
+    """Solve the problem using BFS."""
+    initial_state = (3, 3, 1)  # All on the left bank
+    goal_state = (0, 0, 0)  # All on the right bank
+    queue = deque([(initial_state, [])])  # (current_state, path)
+    visited = set()
+
+    while queue:
+        current_state, path = queue.popleft()
+        
+        if current_state == goal_state:
+            return path + [current_state]  # Return the solution path
+        
+        if current_state in visited:
+            continue
+        visited.add(current_state)
+        
+        for successor in get_successors(current_state):
+            queue.append((successor, path + [current_state]))
+    
+    return None  # No solution found
+
+def print_solution(solution):
+    """Print the sequence of states in the solution."""
+    for step, state in enumerate(solution):
+        m_left, c_left, boat = state
+        m_right, c_right = 3 - m_left, 3 - c_left
+        boat_side = "Left" if boat == 1 else "Right"
+        print(f"Step {step}:")
+        print(f"  Left Bank: {m_left} missionaries, {c_left} cannibals")
+        print(f"  Right Bank: {m_right} missionaries, {c_right} cannibals")
+        print(f"  Boat is on the {boat_side} bank\n")
+
+# Solve and print the solution
+solution = missionaries_and_cannibals()
+if solution:
+    print("Solution found:")
+    print_solution(solution)
+else:
+    print("No solution exists.")
